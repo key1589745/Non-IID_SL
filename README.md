@@ -15,9 +15,13 @@ This project is developed for the TMI paper: [A New Framework of Swarm Learning 
   doi={10.1109/TMI.2022.3220750}}
 ```
 
+# Environments
+Pytorch == 1.8.1, cuda == 10.1, cudnn == 8.0
+
 # Usage
 ```
-python main.py --mode non-iid --weight 0.1
+pip install -r requirements.txt
+python main.py --mode nsl --weight 0.1 --loss UNCE
 ```
 
 If you have any problems, please feel free to contact us. Thanks for your attention.
