@@ -1,12 +1,7 @@
 # -*- coding:utf-8 -*-
-import time
-import random, glob
+
 import numpy as np
-import numpy.linalg as npl
-
-
-from batchgenerators.transforms import GammaTransform, Compose
-from batchgenerators.transforms.abstract_transforms import AbstractTransform
+from batchgenerators.transforms.abstract_transforms import AbstractTransform, Compose
 from batchgenerators.transforms.color_transforms import BrightnessMultiplicativeTransform, \
     ContrastAugmentationTransform, BrightnessTransform
 from batchgenerators.transforms.noise_transforms import GaussianNoiseTransform, GaussianBlurTransform
@@ -15,7 +10,7 @@ from batchgenerators.transforms.spatial_transforms import SpatialTransform_2, Mi
 
 
 def get_DA(patch_size,intensity_DA=False,spatial_DA=False):
-    
+
     additive_brightness_mu = 0
     additive_brightness_sigma = 0.2
     additive_brightness_p_per_sample = 0.3
@@ -51,6 +46,5 @@ def get_DA(patch_size,intensity_DA=False,spatial_DA=False):
         tr_transforms.append(MirrorTransform(axes=(0, 1)))
 
     tr_transforms = Compose(tr_transforms)
-    
-    return tr_transforms
 
+    return tr_transforms

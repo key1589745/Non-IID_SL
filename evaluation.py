@@ -56,7 +56,7 @@ def Hausdorff_compute(pred,groundtruth,num_class,spacing):
             overlap_results[0,i, 2] = overlap_measures_filter.GetVolumeSimilarity()
             overlap_results[0,i, 3] = overlap_measures_filter.GetFalseNegativeError()
             overlap_results[0,i, 4] = overlap_measures_filter.GetFalsePositiveError()
-            
+
             # Hausdorff distance
             hausdorff_distance_filter.Execute(ITKTrue==i, ITKPred==i)
 
@@ -100,35 +100,20 @@ def Hausdorff_compute(pred,groundtruth,num_class,spacing):
             surface_distance_results[0,i, 2] = np.median(all_surface_distances)
             surface_distance_results[0,i, 3] = np.std(all_surface_distances)
             surface_distance_results[0,i, 4] = np.max(all_surface_distances)
-            
+
 
     return overlap_results,surface_distance_results
-
-
-# def multi_dice_iou_compute(pred,label):
-#     truemax, truearg = torch.max(pred, 1, keepdim=False)
-#     truearg = truearg.detach().cpu().numpy()
-#     # nplabs = np.stack((truearg == 0, truearg == 1, truearg == 2, truearg == 3, \
-#     #                    truearg == 4, truearg == 5, truearg == 6, truearg == 7), 1)
-#     nplabs = np.stack((truearg == 0, truearg == 1, truearg == 2, truearg == 3, truearg == 4, truearg == 5), 1)
-#     # truelabel = (truearg == 0) * 550 + (truearg == 1) * 420 + (truearg == 2) * 600 + (truearg == 3) * 500 + \
-#     #             (truearg == 4) * 250 + (truearg == 5) * 850 + (truearg == 6) * 820 + (truearg == 7) * 0
-
-#     dice = dice_compute(nplabs, label.cpu().numpy())
-#     Iou = IOU_compute(nplabs, label.cpu().numpy())
-
-#     return dice,Iou
 
 
 
 class Evaluator(object):
     def __init__(self,data_loader_vali,num_cls):
-        
+
         self.vali_loaders = data_loader_vali
         self.num_cls = num_cls
 
     def eval(self, model,client):
- 
+
         total_overlap = np.zeros((1, self.num_cls, 5))
         res = {}
         model.eval()
@@ -138,30 +123,30 @@ class Evaluator(object):
             labs = vali_batch['seg']
 
             output= model(imgs)
- 
+
             truemax, truearg0 = torch.max(output, 1, keepdim=False)
 
             truearg = truearg0.detach().cpu().numpy().astype(np.uint8)
-            
+
             if len(labs.shape) == len(output.shape):
                 labs = labs[:, 0]
-            
+
             overlap_result, _ = Hausdorff_compute(truearg, labs, self.num_cls, (1.5,1.5,10,1))
 
             total_overlap = np.concatenate((total_overlap, overlap_result), axis=0)
-            
+
             #del input, truearg0, truemax
-             
+
         meanDice = np.round(np.mean(total_overlap[1:,:,1], axis=0),4)
         res = dict(zip(['Myo','LV','RV'],meanDice[1:]))
-        
+
         return res
-    
+
 
 class knowledge_metric(Evaluator):
     # evaluate the knowledge forgetting during local training
     def eval(self, model,client,labels):
-        
+
         total_overlap = np.zeros((1, self.num_cls, 5))
         res = {}
         model.eval()
@@ -171,17 +156,17 @@ class knowledge_metric(Evaluator):
             labs = vali_batch['seg']
 
             output= model(imgs)
- 
+
             truemax, truearg0 = torch.max(output, 1, keepdim=False)
 
             truearg = truearg0.detach().cpu().numpy().astype(np.uint8)
-            
+
             if len(labs.shape) == len(output.shape):
                 labs = labs[:, 0]
-            
+
             overlap_result, _ = Hausdorff_compute(truearg, labs, self.num_cls, (1.5,1.5,10,1))
 
             total_overlap = np.concatenate((total_overlap, overlap_result), axis=0)
-            
-                    
+
+
         return np.mean(total_overlap[1:,labels,1],1)
